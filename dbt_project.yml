@@ -1,0 +1,45 @@
+name: finops_cost
+version: "1.0.0"
+config-version: 2
+profile: finops_cost
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+clean-targets:
+  - target
+  - dbt_packages
+  - logs
+
+vars:
+  # Rolling z-score screen. Documented in README; not a production detector.
+  anomaly_z_threshold: 3
+  anomaly_min_history_days: 14
+  anomaly_window_days: 28
+  # Also require cost to be at least this far above the trailing mean.
+  # A bare z-score flags smooth storage on the 1st of a shorter month,
+  # because daily accrual depends on the number of days in the month.
+  anomaly_min_lift_ratio: 0.25
+  dataset_label: synthetic-finops-portfolio
+
+models:
+  finops_cost:
+    staging:
+      +materialized: view
+      +schema: staging
+      +tags: ["staging"]
+    intermediate:
+      +materialized: view
+      +schema: intermediate
+      +tags: ["intermediate"]
+    marts:
+      +materialized: table
+      +schema: marts
+      +tags: ["marts"]
+
+seeds:
+  finops_cost:
+    +schema: seed
+    +quote_columns: false

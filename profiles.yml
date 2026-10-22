@@ -1,0 +1,15 @@
+# Checked in on purpose. The DuckDB file is local and there are no secrets.
+# Run dbt from the repository root with DBT_PROFILES_DIR set to this directory.
+finops_cost:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: data/warehouse/finops.duckdb
+      schema: main
+      threads: 4
+    ci:
+      type: duckdb
+      path: data/warehouse/finops.duckdb
+      schema: main
+      threads: 2

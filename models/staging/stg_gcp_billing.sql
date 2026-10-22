@@ -1,0 +1,41 @@
+with source_data as (
+    select * from {{ source('cloud_billing', 'gcp_billing') }}
+)
+
+select
+    cast(source_data.billing_row_id as varchar) as billing_row_id,
+    cast(source_data.billing_account_id as varchar) as billing_account_id,
+    cast(source_data.invoice_month as varchar) as invoice_month,
+    cast(source_data.cost_type as varchar) as cost_type,
+    cast(source_data.service_id as varchar) as service_id,
+    cast(source_data.service_description as varchar) as service_description,
+    cast(source_data.sku_id as varchar) as sku_id,
+    cast(source_data.sku_description as varchar) as sku_description,
+    cast(source_data.usage_start_time as date) as usage_start_date,
+    cast(source_data.usage_end_time as date) as usage_end_date,
+    cast(source_data.project_id as varchar) as project_id,
+    cast(source_data.project_number as varchar) as project_number,
+    cast(source_data.project_name as varchar) as project_name,
+    cast(source_data.label_team as varchar) as label_team,
+    cast(source_data.label_environment as varchar) as label_environment,
+    cast(source_data.label_cost_center as varchar) as label_cost_center,
+    cast(source_data.label_application as varchar) as label_application,
+    cast(source_data.location_location as varchar) as location_location,
+    cast(source_data.location_country as varchar) as location_country,
+    cast(source_data.location_region as varchar) as location_region,
+    cast(source_data.cost as double) as cost,
+    cast(source_data.currency as varchar) as currency,
+    cast(source_data.currency_conversion_rate as double) as currency_conversion_rate,
+    cast(source_data.usage_amount as double) as usage_amount,
+    cast(source_data.usage_unit as varchar) as usage_unit,
+    cast(source_data.usage_amount_in_pricing_units as double) as usage_amount_in_pricing_units,
+    cast(source_data.usage_pricing_unit as varchar) as usage_pricing_unit,
+    cast(source_data.credits_name as varchar) as credits_name,
+    cast(source_data.credits_type as varchar) as credits_type,
+    cast(source_data.credits_amount as double) as credits_amount,
+    cast(source_data.cost_at_list as double) as cost_at_list,
+    cast(source_data.export_time as timestamp) as export_time,
+    cast(source_data._synthetic as boolean) as is_synthetic,
+    cast(source_data._dataset_label as varchar) as dataset_label,
+    nullif(cast(source_data._spike_id as varchar), '') as spike_id
+from source_data

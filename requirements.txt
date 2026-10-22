@@ -1,0 +1,10 @@
+dbt-core==1.12.6
+dbt-duckdb==1.11.0
+duckdb==2.0.0
+numpy==1.26.4
+pandas==2.3.3
+pyarrow==21.0.0
+pytest==8.4.2
+ruff==0.17.1
+sqlfluff==4.4.0
+sqlfluff-templater-dbt==4.4.0

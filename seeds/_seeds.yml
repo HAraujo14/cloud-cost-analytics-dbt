@@ -1,0 +1,61 @@
+version: 2
+
+seeds:
+  - name: service_categories
+    description: >
+      Canonical service-to-category map. dim_service drops a service that is
+      missing here, and a singular test fails the build when that happens.
+    columns:
+      - name: cloud_provider
+        description: aws or gcp.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["aws", "gcp"]
+      - name: service_name
+        description: Service display name. Matches the conformed cost lines.
+        data_tests: [not_null]
+      - name: service_category
+        description: Coarse FinOps category.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["compute", "storage", "database", "serverless", "network", "observability", "analytics"]
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - cloud_provider
+              - service_name
+
+  - name: accounts
+    description: >
+      Account and project register used to name AWS usage accounts. The
+      generator writes it from the same catalog as the extracts. Friendly
+      names are not on the CUR lines themselves.
+    columns:
+      - name: cloud_provider
+        description: aws or gcp.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["aws", "gcp"]
+      - name: account_id
+        description: AWS account id or GCP project id.
+        data_tests: [not_null, unique]
+      - name: account_name
+        description: Friendly name.
+        data_tests: [not_null]
+      - name: environment
+        description: The one environment this account is allowed to carry.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["prod", "staging", "sandbox"]
+      - name: billing_account_id
+        description: AWS payer account or GCP billing account.
+        data_tests: [not_null]

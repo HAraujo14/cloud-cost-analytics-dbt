@@ -1,0 +1,45 @@
+{
+  "dataset_label": "synthetic-finops-portfolio",
+  "method": "ols_trend_plus_weekday",
+  "series": [
+    {
+      "disclaimer": "Backtest MAPE is computed on this synthetic series only. The band is +/- 1.96 residual standard deviations and is illustrative, not a calibrated prediction interval.",
+      "holdout_days": 28,
+      "holdout_mape": 0.021776,
+      "holdout_mape_excluding_spikes": 0.021776,
+      "horizon_days": 30,
+      "method": "ols_trend_plus_weekday",
+      "residual_stddev": 8.729266,
+      "series": "total",
+      "spike_days_excluded_from_fit": 7,
+      "training_days": 176,
+      "trend_slope_per_day": 0.437908
+    },
+    {
+      "disclaimer": "Backtest MAPE is computed on this synthetic series only. The band is +/- 1.96 residual standard deviations and is illustrative, not a calibrated prediction interval.",
+      "holdout_days": 28,
+      "holdout_mape": 0.018061,
+      "holdout_mape_excluding_spikes": 0.018061,
+      "horizon_days": 30,
+      "method": "ols_trend_plus_weekday",
+      "residual_stddev": 6.259863,
+      "series": "aws",
+      "spike_days_excluded_from_fit": 6,
+      "training_days": 177,
+      "trend_slope_per_day": 0.267487
+    },
+    {
+      "disclaimer": "Backtest MAPE is computed on this synthetic series only. The band is +/- 1.96 residual standard deviations and is illustrative, not a calibrated prediction interval.",
+      "holdout_days": 28,
+      "holdout_mape": 0.021877,
+      "holdout_mape_excluding_spikes": 0.021877,
+      "horizon_days": 30,
+      "method": "ols_trend_plus_weekday",
+      "residual_stddev": 4.17137,
+      "series": "gcp",
+      "spike_days_excluded_from_fit": 1,
+      "training_days": 182,
+      "trend_slope_per_day": 0.171202
+    }
+  ]
+}

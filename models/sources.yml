@@ -1,0 +1,207 @@
+version: 2
+
+sources:
+  - name: cloud_billing
+    description: >
+      Synthetic billing extracts written by `python -m scripts.generate_billing`.
+      The AWS file uses CUR column names. The GCP file uses flattened Cloud
+      Billing export field names. Both are daily, labelled synthetic, and
+      local. There is no cloud account behind them.
+    tables:
+      - name: aws_cur
+        description: >
+          Synthetic AWS Cost and Usage Report lines. One row per resource per
+          day, plus a separate Credit line where a synthetic savings-plan
+          credit applies. Account IDs are fake.
+        meta:
+          external_location: "read_parquet('data/raw/aws_cur.parquet')"
+        columns:
+          - name: identity_line_item_id
+            description: Synthetic line id. Unique within this extract.
+            data_tests:
+              - unique
+              - not_null
+          - name: identity_time_interval
+            description: Daily usage window, formatted like a CUR identity interval.
+          - name: bill_billing_entity
+            description: Always AWS in this extract.
+          - name: bill_bill_type
+            description: Anniversary, matching a standard monthly CUR bill type.
+          - name: bill_payer_account_id
+            description: Fake 12-digit payer account id shared by every AWS row.
+          - name: bill_billing_period_start_date
+            description: First day of the usage month. Invoice lag is not modelled.
+          - name: bill_billing_period_end_date
+            description: First day of the next month (CUR period end is exclusive).
+          - name: line_item_usage_account_id
+            description: Fake usage account id.
+            data_tests:
+              - not_null
+          - name: line_item_line_item_type
+            description: Usage or Credit.
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ["Usage", "Credit"]
+          - name: line_item_usage_start_date
+            description: Start of the daily usage window.
+            data_tests:
+              - not_null
+          - name: line_item_usage_end_date
+            description: End of the daily usage window.
+          - name: line_item_product_code
+            description: CUR product code, for example AmazonEC2.
+          - name: line_item_usage_type
+            description: Illustrative CUR usage type, for example BoxUsage:m6i.xlarge.
+          - name: line_item_operation
+            description: Illustrative CUR operation, for example RunInstances.
+          - name: line_item_availability_zone
+            description: Region plus zone letter for zonal resources; otherwise null.
+          - name: line_item_resource_id
+            description: Synthetic resource id. Null on credit lines.
+          - name: line_item_usage_amount
+            description: Usage in pricing units. Zero on credit lines.
+          - name: line_item_unblended_rate
+            description: Anchor rate for usage lines. Null on credit lines.
+          - name: line_item_unblended_cost
+            description: Positive for Usage, negative for Credit.
+            data_tests:
+              - not_null
+          - name: line_item_net_unblended_cost
+            description: Equal to unblended cost. No separate private-rate discount is modelled.
+          - name: line_item_currency_code
+            description: USD.
+          - name: line_item_line_item_description
+            description: Description prefixed with SYNTHETIC.
+          - name: product_servicecode
+            description: Same product code as line_item_product_code in this extract.
+          - name: product_servicename
+            description: Service display name.
+          - name: product_region
+            description: Region code.
+          - name: product_sku
+            description: SYN-prefixed placeholder SKU. Not a real AWS SKU.
+          - name: pricing_unit
+            description: Unit the usage amount and rate are expressed in.
+          - name: resource_tags_user_team
+            description: Synthetic user tag for the owning team.
+          - name: resource_tags_user_environment
+            description: prod, staging, or sandbox.
+          - name: resource_tags_user_cost_center
+            description: Synthetic cost center tag.
+          - name: resource_tags_user_application
+            description: Synthetic application tag.
+          - name: _synthetic
+            description: Always true.
+            data_tests:
+              - not_null
+          - name: _dataset_label
+            description: Constant label so the file cannot be mistaken for a real CUR.
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ["synthetic-finops-portfolio"]
+          - name: _spike_id
+            description: Injected incident id for days the generator multiplied, otherwise null.
+
+      - name: gcp_billing
+        description: >
+          Synthetic Cloud Billing export, flattened to one row per resource
+          per day. Nested fields such as project, service, sku, location,
+          usage, and credits are columns. Real exports nest those structs.
+          Service ids are SYN- placeholders.
+        meta:
+          external_location: "read_parquet('data/raw/gcp_billing.parquet')"
+        columns:
+          - name: billing_row_id
+            description: Synthetic row id. The real export has no single primary key.
+            data_tests:
+              - unique
+              - not_null
+          - name: billing_account_id
+            description: Fake billing account id shaped like the real format.
+          - name: invoice_month
+            description: Invoice month as YYYYMM. Set from the usage month; lag is not modelled.
+          - name: cost_type
+            description: regular. Tax and adjustment lines are not in this extract.
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: ["regular"]
+          - name: service_id
+            description: SYN-prefixed placeholder. Not a Cloud Billing catalog id.
+          - name: service_description
+            description: Service name, for example BigQuery.
+          - name: sku_id
+            description: SYN-prefixed placeholder SKU.
+          - name: sku_description
+            description: Usage type, for example Analysis or e2-standard-4.
+          - name: usage_start_time
+            description: Start of the daily usage window.
+            data_tests:
+              - not_null
+          - name: usage_end_time
+            description: End of the daily usage window.
+          - name: project_id
+            description: Fake project id.
+            data_tests:
+              - not_null
+          - name: project_number
+            description: Fake project number.
+          - name: project_name
+            description: Project display name.
+          - name: label_team
+            description: Flattened resource label for team.
+          - name: label_environment
+            description: Flattened resource label for environment.
+          - name: label_cost_center
+            description: Flattened resource label for cost center.
+          - name: label_application
+            description: Flattened resource label for application.
+          - name: location_location
+            description: Region, used as location.location.
+          - name: location_country
+            description: Country derived from the region.
+          - name: location_region
+            description: Region code.
+          - name: cost
+            description: Pre-credit cost. Always >= 0 in this extract.
+            data_tests:
+              - not_null
+          - name: currency
+            description: USD.
+          - name: currency_conversion_rate
+            description: 1, because the extract is already USD.
+          - name: usage_amount
+            description: Usage in the pricing unit.
+          - name: usage_unit
+            description: Unit of usage_amount.
+          - name: usage_amount_in_pricing_units
+            description: Same as usage_amount. The real export can differ when units convert.
+          - name: usage_pricing_unit
+            description: Pricing unit. Same as usage_unit in this extract.
+          - name: credits_name
+            description: Credit name when a synthetic CUD applies, otherwise null.
+          - name: credits_type
+            description: COMMITTED_USAGE_DISCOUNT when a credit applies, otherwise null.
+          - name: credits_amount
+            description: Credit amount. Negative or zero, matching the export convention.
+          - name: cost_at_list
+            description: Equal to cost. No separate list-price discount is modelled.
+          - name: export_time
+            description: Synthetic processing time one day after the usage window ends.
+          - name: _synthetic
+            description: Always true.
+            data_tests:
+              - not_null
+          - name: _dataset_label
+            description: Constant label so the file cannot be mistaken for a real export.
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ["synthetic-finops-portfolio"]
+          - name: _spike_id
+            description: Injected incident id, otherwise null.

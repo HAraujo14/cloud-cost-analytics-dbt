@@ -1,0 +1,16 @@
+cloud_provider,service_name,service_category
+aws,AWS Data Transfer,network
+aws,AWS Lambda,serverless
+aws,Amazon CloudWatch,observability
+aws,Amazon Elastic Compute Cloud,compute
+aws,Amazon Elastic Kubernetes Service,compute
+aws,Amazon Relational Database Service,database
+aws,Amazon Simple Storage Service,storage
+aws,Amazon Virtual Private Cloud,network
+gcp,BigQuery,analytics
+gcp,Cloud Logging,observability
+gcp,Cloud SQL,database
+gcp,Cloud Storage,storage
+gcp,Compute Engine,compute
+gcp,Kubernetes Engine,compute
+gcp,Networking,network

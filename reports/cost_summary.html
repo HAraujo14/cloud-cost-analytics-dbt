@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Synthetic cloud cost summary</title>
+<style>
+body { font-family: Georgia, serif; max-width: 960px; margin: 2rem auto;
+  padding: 0 1rem; color: #1c1c1c; }
+table { border-collapse: collapse; width: 100%; margin: 0.5rem 0 1.5rem; }
+th, td { border-bottom: 1px solid #ccc; text-align: left; padding: 0.35rem 0.5rem;
+  font-family: ui-sans-serif, sans-serif; font-size: 0.92rem; }
+th { background: #f4f1ea; }
+.banner { background: #f4f1ea; border-left: 4px solid #8a5a00;
+  padding: 0.75rem 1rem; }
+</style>
+</head>
+<body>
+<h1>Synthetic cloud cost summary</h1>
+<p class="banner">Synthetic data (synthetic-finops-portfolio).
+These figures are computed from the generated extract.
+They are not real cloud spend.</p>
+<h2>Window</h2>
+<ul>
+<li>Usage dates: 2026-04-01 through 2026-09-30</li>
+<li>Daily fact rows: 6,405</li>
+<li>Gross cost: $139,327.98</li>
+<li>Credits (positive magnitude): $5,690.90</li>
+<li>Net cost: $133,637.08</li>
+</ul>
+<table><thead><tr><th>extract</th><th>rows</th></tr></thead><tbody><tr><td>aws_cur</td><td>7,869</td></tr><tr><td>gcp_billing</td><td>5,124</td></tr></tbody></table>
+<h2>Net cost by cloud</h2>
+<table><thead><tr><th>cloud</th><th>net cost</th><th>gross cost</th></tr></thead><tbody><tr><td>aws</td><td>$86,268.94</td><td>$90,065.50</td></tr><tr><td>gcp</td><td>$47,368.14</td><td>$49,262.48</td></tr></tbody></table>
+<h2>Latest month (2026-09)</h2>
+<h3>By team</h3>
+<table><thead><tr><th>team</th><th>net cost</th></tr></thead><tbody><tr><td>data-platform</td><td>$13,344.67</td></tr><tr><td>product-backend</td><td>$6,373.48</td></tr><tr><td>shared-services</td><td>$2,554.88</td></tr><tr><td>ml-platform</td><td>$577.21</td></tr><tr><td>finops</td><td>$103.17</td></tr></tbody></table>
+<h3>Largest services</h3>
+<table><thead><tr><th>cloud</th><th>service</th><th>net cost</th></tr></thead><tbody><tr><td>aws</td><td>Amazon Elastic Compute Cloud</td><td>$5,393.06</td></tr><tr><td>aws</td><td>Amazon Simple Storage Service</td><td>$4,274.42</td></tr><tr><td>gcp</td><td>BigQuery</td><td>$2,637.03</td></tr><tr><td>gcp</td><td>Cloud Storage</td><td>$2,084.68</td></tr><tr><td>gcp</td><td>Compute Engine</td><td>$1,825.77</td></tr><tr><td>aws</td><td>Amazon Relational Database Service</td><td>$1,697.94</td></tr><tr><td>aws</td><td>AWS Lambda</td><td>$1,210.84</td></tr><tr><td>aws</td><td>Amazon CloudWatch</td><td>$962.84</td></tr></tbody></table>
+<h3>Largest month-over-month moves</h3>
+<table><thead><tr><th>cloud</th><th>service</th><th>this month</th><th>prior month</th><th>change</th></tr></thead><tbody><tr><td>aws</td><td>Amazon Virtual Private Cloud</td><td>$629.24</td><td>$811.57</td><td>-22.5%</td></tr><tr><td>aws</td><td>Amazon Simple Storage Service</td><td>$4,274.42</td><td>$4,162.83</td><td>2.7%</td></tr><tr><td>gcp</td><td>BigQuery</td><td>$2,637.03</td><td>$2,536.49</td><td>4.0%</td></tr><tr><td>gcp</td><td>Cloud Storage</td><td>$2,084.68</td><td>$2,023.39</td><td>3.0%</td></tr><tr><td>aws</td><td>Amazon CloudWatch</td><td>$962.84</td><td>$987.38</td><td>-2.5%</td></tr><tr><td>aws</td><td>AWS Lambda</td><td>$1,210.84</td><td>$1,191.00</td><td>1.7%</td></tr><tr><td>aws</td><td>Amazon Relational Database Service</td><td>$1,697.94</td><td>$1,714.64</td><td>-1.0%</td></tr><tr><td>gcp</td><td>Cloud SQL</td><td>$461.92</td><td>$478.06</td><td>-3.4%</td></tr></tbody></table>
+<h2>Anomaly screen</h2>
+<p>Rolling 28-day z-score of daily net cost by account and service.
+A day is flagged when at least 14 prior days exist, z &gt;= 3,
+and net cost is at least 25% above the trailing mean.</p>
+<ul>
+<li>Labelled spike account-service-days: 7</li>
+<li>Of those, flagged by the screen: 7</li>
+<li>Flagged days in total: 7</li>
+<li>Flagged days with no injected spike label: 0</li>
+</ul>
+<table><thead><tr><th>date</th><th>cloud</th><th>account</th><th>service</th><th>net cost</th><th>baseline</th><th>z</th><th>spike</th></tr></thead><tbody><tr><td>2026-05-12</td><td>aws</td><td>aws-sandbox</td><td>Amazon Elastic Compute Cloud</td><td>$32.67</td><td>$1.97</td><td>57.80</td><td>syn-sandbox-ec2</td></tr><tr><td>2026-08-18</td><td>aws</td><td>aws-prod-platform</td><td>Amazon Virtual Private Cloud</td><td>$120.72</td><td>$20.21</td><td>42.89</td><td>syn-nat-cross-az</td></tr><tr><td>2026-06-09</td><td>aws</td><td>aws-prod-platform</td><td>Amazon Elastic Compute Cloud</td><td>$478.07</td><td>$117.41</td><td>31.16</td><td>syn-ec2-autoscale</td></tr><tr><td>2026-07-21</td><td>gcp</td><td>gcp-prod-analytics</td><td>BigQuery</td><td>$492.19</td><td>$78.16</td><td>23.53</td><td>syn-bq-full-scan</td></tr><tr><td>2026-06-10</td><td>aws</td><td>aws-prod-platform</td><td>Amazon Elastic Compute Cloud</td><td>$455.67</td><td>$130.01</td><td>4.71</td><td>syn-ec2-autoscale</td></tr><tr><td>2026-08-19</td><td>aws</td><td>aws-prod-platform</td><td>Amazon Virtual Private Cloud</td><td>$112.54</td><td>$23.69</td><td>4.64</td><td>syn-nat-cross-az</td></tr><tr><td>2026-06-11</td><td>aws</td><td>aws-prod-platform</td><td>Amazon Elastic Compute Cloud</td><td>$457.62</td><td>$141.98</td><td>3.41</td><td>syn-ec2-autoscale</td></tr></tbody></table>
+<h2>Unit cost</h2>
+<p>Spikes in this dataset scale usage and price together, so unit cost
+stays near the anchor rate. Credits lower the net unit cost.</p>
+<table><thead><tr><th>service</th><th>usage type</th><th>unit</th><th>gross unit cost</th><th>net unit cost</th></tr></thead><tbody><tr><td>Amazon Simple Storage Service</td><td>TimedStorage-ByteHrs</td><td>GB-Month</td><td>0.023000</td><td>0.023000</td></tr><tr><td>Amazon Elastic Compute Cloud</td><td>BoxUsage:m6i.xlarge</td><td>hours</td><td>0.192000</td><td>0.168960</td></tr><tr><td>Cloud Storage</td><td>Standard Storage</td><td>GB-Month</td><td>0.020000</td><td>0.020000</td></tr><tr><td>Compute Engine</td><td>e2-standard-4</td><td>hours</td><td>0.134000</td><td>0.114367</td></tr><tr><td>BigQuery</td><td>Analysis</td><td>TiB</td><td>6.250000</td><td>6.250000</td></tr><tr><td>Amazon Elastic Compute Cloud</td><td>BoxUsage:m6i.2xlarge</td><td>hours</td><td>0.384000</td><td>0.353280</td></tr><tr><td>BigQuery</td><td>Active Logical Storage</td><td>GB-Month</td><td>0.020000</td><td>0.020000</td></tr><tr><td>AWS Lambda</td><td>USE1-Lambda-GB-Second</td><td>GB-Seconds</td><td>0.000017</td><td>0.000017</td></tr></tbody></table>
+<h2>Forecast</h2>
+<p>OLS trend plus an additive weekday residual. The band is illustrative,
+not a calibrated prediction interval. Holdout MAPE is a backtest
+on this synthetic series only.</p>
+<table><thead><tr><th>series</th><th>holdout MAPE</th><th>MAPE excluding spike days</th><th>slope per day</th></tr></thead><tbody><tr><td>total</td><td>2.2%</td><td>2.2%</td><td>0.44</td></tr><tr><td>aws</td><td>1.8%</td><td>1.8%</td><td>0.27</td></tr><tr><td>gcp</td><td>2.2%</td><td>2.2%</td><td>0.17</td></tr></tbody></table>
+<table><thead><tr><th>series</th><th>date</th><th>forecast net cost</th><th>lower band</th><th>upper band</th></tr></thead><tbody><tr><td>aws</td><td>2026-10-01</td><td>$521.19</td><td>$508.92</td><td>$533.46</td></tr><tr><td>aws</td><td>2026-10-02</td><td>$523.16</td><td>$510.89</td><td>$535.43</td></tr><tr><td>aws</td><td>2026-10-03</td><td>$404.53</td><td>$392.26</td><td>$416.80</td></tr><tr><td>aws</td><td>2026-10-04</td><td>$404.16</td><td>$391.89</td><td>$416.43</td></tr><tr><td>aws</td><td>2026-10-05</td><td>$523.40</td><td>$511.13</td><td>$535.67</td></tr><tr><td>aws</td><td>2026-10-06</td><td>$522.81</td><td>$510.55</td><td>$535.08</td></tr><tr><td>aws</td><td>2026-10-07</td><td>$522.82</td><td>$510.55</td><td>$535.09</td></tr><tr><td>gcp</td><td>2026-10-01</td><td>$289.95</td><td>$281.78</td><td>$298.13</td></tr><tr><td>gcp</td><td>2026-10-02</td><td>$290.34</td><td>$282.17</td><td>$298.52</td></tr><tr><td>gcp</td><td>2026-10-03</td><td>$227.48</td><td>$219.31</td><td>$235.66</td></tr><tr><td>gcp</td><td>2026-10-04</td><td>$226.99</td><td>$218.81</td><td>$235.16</td></tr><tr><td>gcp</td><td>2026-10-05</td><td>$291.33</td><td>$283.16</td><td>$299.51</td></tr><tr><td>gcp</td><td>2026-10-06</td><td>$292.59</td><td>$284.42</td><td>$300.77</td></tr><tr><td>gcp</td><td>2026-10-07</td><td>$290.99</td><td>$282.82</td><td>$299.17</td></tr><tr><td>total</td><td>2026-10-01</td><td>$810.16</td><td>$793.06</td><td>$827.27</td></tr><tr><td>total</td><td>2026-10-02</td><td>$812.60</td><td>$795.49</td><td>$829.71</td></tr><tr><td>total</td><td>2026-10-03</td><td>$631.11</td><td>$614.00</td><td>$648.22</td></tr><tr><td>total</td><td>2026-10-04</td><td>$630.25</td><td>$613.14</td><td>$647.36</td></tr><tr><td>total</td><td>2026-10-05</td><td>$813.83</td><td>$796.72</td><td>$830.94</td></tr><tr><td>total</td><td>2026-10-06</td><td>$814.51</td><td>$797.40</td><td>$831.62</td></tr><tr><td>total</td><td>2026-10-07</td><td>$812.73</td><td>$795.62</td><td>$829.84</td></tr></tbody></table>
+</body>
+</html>

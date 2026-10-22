@@ -1,0 +1,9 @@
+cloud_provider,account_id,account_name,environment,billing_account_id
+aws,100000000001,aws-prod-platform,prod,100000000000
+aws,100000000002,aws-prod-data,prod,100000000000
+aws,100000000003,aws-staging,staging,100000000000
+aws,100000000004,aws-sandbox,sandbox,100000000000
+gcp,synth-gcp-prod-analytics,gcp-prod-analytics,prod,AAAAAA-SYNTH-000001
+gcp,synth-gcp-prod-app,gcp-prod-app,prod,AAAAAA-SYNTH-000001
+gcp,synth-gcp-sandbox,gcp-sandbox,sandbox,AAAAAA-SYNTH-000001
+gcp,synth-gcp-staging,gcp-staging,staging,AAAAAA-SYNTH-000001

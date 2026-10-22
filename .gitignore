@@ -1,0 +1,21 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# dbt build artifacts
+target/
+dbt_packages/
+logs/
+.user.yml
+
+# Local warehouse and bulky synthetic extracts. Regenerate with `make generate`.
+data/raw/*.parquet
+data/warehouse/*.duckdb
+data/warehouse/*.wal
+data/warehouse/*.duckdb.wal
+
+.DS_Store

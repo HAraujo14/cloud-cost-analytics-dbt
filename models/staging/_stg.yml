@@ -1,0 +1,231 @@
+version: 2
+
+models:
+  - name: stg_aws_cur
+    description: >
+      Typed AWS CUR lines. Column names stay close to the extract.
+      Business rules such as credit sign and the shared cost grain
+      are applied in int_cost_lines, not here.
+    columns:
+      - name: identity_line_item_id
+        description: Synthetic CUR line id.
+        data_tests: [not_null, unique]
+      - name: identity_time_interval
+        description: Daily usage window text.
+      - name: bill_billing_entity
+        description: Billing entity from the extract.
+      - name: bill_bill_type
+        description: Bill type from the extract.
+      - name: bill_payer_account_id
+        description: Fake payer account id.
+        data_tests: [not_null]
+      - name: bill_billing_period_start_date
+        description: Billing period start.
+      - name: bill_billing_period_end_date
+        description: Billing period end.
+      - name: line_item_usage_account_id
+        description: Fake usage account id.
+        data_tests: [not_null]
+      - name: line_item_line_item_type
+        description: Usage or Credit.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["Usage", "Credit"]
+      - name: line_item_usage_start_date
+        description: Usage date.
+        data_tests: [not_null]
+      - name: line_item_usage_end_date
+        description: Usage window end.
+      - name: line_item_product_code
+        description: Product code.
+      - name: line_item_usage_type
+        description: Usage type.
+        data_tests: [not_null]
+      - name: line_item_operation
+        description: Operation.
+      - name: line_item_availability_zone
+        description: Availability zone, when the resource is zonal.
+      - name: line_item_resource_id
+        description: Synthetic resource id.
+      - name: line_item_usage_amount
+        description: Usage amount.
+        data_tests: [not_null]
+      - name: line_item_unblended_rate
+        description: Anchor rate for usage lines.
+      - name: line_item_unblended_cost
+        description: Unblended cost, negative only on Credit lines.
+        data_tests: [not_null]
+      - name: line_item_net_unblended_cost
+        description: Net unblended cost from the extract.
+      - name: line_item_currency_code
+        description: Currency code.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["USD"]
+      - name: line_item_line_item_description
+        description: Line description, prefixed SYNTHETIC.
+      - name: product_servicecode
+        description: Product code repeated from the product columns.
+      - name: product_servicename
+        description: Service name.
+        data_tests: [not_null]
+      - name: product_region
+        description: Region.
+        data_tests: [not_null]
+      - name: product_sku
+        description: Placeholder SKU.
+      - name: pricing_unit
+        description: Pricing unit.
+        data_tests: [not_null]
+      - name: resource_tags_user_team
+        description: Team tag.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["data-platform", "product-backend", "ml-platform", "shared-services", "finops"]
+      - name: resource_tags_user_environment
+        description: Environment tag.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["prod", "staging", "sandbox"]
+      - name: resource_tags_user_cost_center
+        description: Cost center tag.
+        data_tests: [not_null]
+      - name: resource_tags_user_application
+        description: Application tag.
+        data_tests: [not_null]
+      - name: is_synthetic
+        description: True on every row.
+        data_tests: [not_null]
+      - name: dataset_label
+        description: Dataset label copied from the extract.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["synthetic-finops-portfolio"]
+      - name: spike_id
+        description: Injected spike id, or null.
+
+  - name: stg_gcp_billing
+    description: >
+      Typed, flattened GCP billing rows. Credits stay negative, which is
+      the export's convention. int_cost_lines converts them to a positive
+      magnitude.
+    columns:
+      - name: billing_row_id
+        description: Synthetic row id.
+        data_tests: [not_null, unique]
+      - name: billing_account_id
+        description: Fake billing account id.
+        data_tests: [not_null]
+      - name: invoice_month
+        description: YYYYMM invoice month.
+        data_tests: [not_null]
+      - name: cost_type
+        description: Cost type from the export. Only regular is generated.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["regular"]
+      - name: service_id
+        description: Placeholder service id.
+        data_tests: [not_null]
+      - name: service_description
+        description: Service name.
+        data_tests: [not_null]
+      - name: sku_id
+        description: Placeholder SKU id.
+      - name: sku_description
+        description: SKU / usage type.
+        data_tests: [not_null]
+      - name: usage_start_date
+        description: Usage date.
+        data_tests: [not_null]
+      - name: usage_end_date
+        description: Usage window end.
+      - name: project_id
+        description: Fake project id.
+        data_tests: [not_null]
+      - name: project_number
+        description: Fake project number.
+      - name: project_name
+        description: Project name.
+        data_tests: [not_null]
+      - name: label_team
+        description: Team label.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["data-platform", "product-backend", "ml-platform", "shared-services", "finops"]
+      - name: label_environment
+        description: Environment label.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["prod", "staging", "sandbox"]
+      - name: label_cost_center
+        description: Cost center label.
+        data_tests: [not_null]
+      - name: label_application
+        description: Application label.
+        data_tests: [not_null]
+      - name: location_location
+        description: Location string from the export.
+      - name: location_country
+        description: Country code.
+      - name: location_region
+        description: Region.
+        data_tests: [not_null]
+      - name: cost
+        description: Pre-credit cost.
+        data_tests: [not_null, not_negative]
+      - name: currency
+        description: Currency.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["USD"]
+      - name: currency_conversion_rate
+        description: USD conversion rate.
+      - name: usage_amount
+        description: Usage amount.
+        data_tests: [not_null, not_negative]
+      - name: usage_unit
+        description: Usage unit.
+      - name: usage_amount_in_pricing_units
+        description: Usage expressed in pricing units.
+      - name: usage_pricing_unit
+        description: Pricing unit.
+        data_tests: [not_null]
+      - name: credits_name
+        description: Credit name, or null when there is no credit.
+      - name: credits_type
+        description: Credit type, or null when there is no credit.
+      - name: credits_amount
+        description: Credit amount, negative or zero.
+        data_tests: [not_null]
+      - name: cost_at_list
+        description: List cost. Equal to cost in this extract.
+      - name: export_time
+        description: Synthetic export timestamp.
+      - name: is_synthetic
+        description: True on every row.
+        data_tests: [not_null]
+      - name: dataset_label
+        description: Dataset label.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["synthetic-finops-portfolio"]
+      - name: spike_id
+        description: Injected spike id, or null.

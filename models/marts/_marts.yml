@@ -1,0 +1,409 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: >
+      Calendar spine from the first usage date through the last, with no gaps.
+      Built from the conformed lines so the spine covers both clouds.
+    columns:
+      - name: date_day
+        description: Calendar date.
+        data_tests: [not_null, unique]
+      - name: billing_month
+        description: First day of the month.
+        data_tests: [not_null]
+      - name: day_name
+        description: English weekday name. Hard-coded so it does not follow the OS locale.
+        data_tests: [not_null]
+      - name: iso_day_of_week
+        description: ISO weekday, Monday = 1 through Sunday = 7.
+        data_tests: [not_null]
+      - name: is_weekend
+        description: True for Saturday and Sunday.
+        data_tests: [not_null]
+
+  - name: dim_account
+    description: >
+      One row per AWS account or GCP project observed in the cost lines.
+      Each account has a single environment in this dataset.
+    columns:
+      - name: account_key
+        description: Surrogate key of account_id and cloud_provider.
+        data_tests: [not_null, unique]
+      - name: account_id
+        description: AWS account id or GCP project id.
+        data_tests: [not_null, unique]
+      - name: cloud_provider
+        description: aws or gcp.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["aws", "gcp"]
+      - name: account_name
+        description: Friendly name.
+        data_tests: [not_null]
+      - name: billing_account_id
+        description: Payer or billing account.
+        data_tests: [not_null]
+      - name: environment
+        description: Account environment.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["prod", "staging", "sandbox"]
+      - name: first_usage_date
+        description: Earliest usage date for the account.
+        data_tests: [not_null]
+      - name: last_usage_date
+        description: Latest usage date for the account.
+        data_tests: [not_null]
+
+  - name: dim_service
+    description: >
+      One row per cloud and service, with the category from the
+      service_categories seed.
+    columns:
+      - name: service_key
+        description: Surrogate key of cloud_provider and service_name.
+        data_tests: [not_null, unique]
+      - name: cloud_provider
+        description: aws or gcp.
+        data_tests: [not_null]
+      - name: service_name
+        description: Service display name.
+        data_tests: [not_null]
+      - name: service_code
+        description: AWS product code or placeholder GCP service id.
+        data_tests: [not_null]
+      - name: service_category
+        description: Coarse category from the seed.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["compute", "storage", "database", "serverless", "network", "observability", "analytics"]
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - cloud_provider
+              - service_name
+
+  - name: fct_daily_cost
+    description: >
+      Daily cost fact and the unified multi-cloud reporting grain.
+      One row per usage date, cloud, account, service, usage type, unit,
+      region, team, environment, cost center, and application.
+      net_cost = gross_cost - credit_amount. All three money columns are
+      non-negative. The dataset label is synthetic on every row.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - usage_date
+              - cloud_provider
+              - account_id
+              - service_name
+              - usage_type
+              - usage_unit
+              - region
+              - team
+              - environment
+              - cost_center
+              - application
+    columns:
+      - name: daily_cost_key
+        description: Surrogate key of the grain above.
+        data_tests: [not_null, unique]
+      - name: usage_date
+        description: Usage date.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+      - name: billing_month
+        description: First day of the usage month.
+        data_tests: [not_null]
+      - name: cloud_provider
+        description: aws or gcp.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["aws", "gcp"]
+      - name: account_id
+        description: AWS account id or GCP project id.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_account')
+                field: account_id
+      - name: account_name
+        description: Friendly account or project name.
+        data_tests: [not_null]
+      - name: service_name
+        description: Service display name.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_service')
+                field: service_name
+      - name: service_code
+        description: Product code or placeholder service id.
+        data_tests: [not_null]
+      - name: usage_type
+        description: Usage type or SKU description.
+        data_tests: [not_null]
+      - name: usage_unit
+        description: Pricing unit. Do not sum usage_amount across different units.
+        data_tests: [not_null]
+      - name: region
+        description: Region.
+        data_tests: [not_null]
+      - name: team
+        description: Team tag.
+        data_tests: [not_null]
+      - name: environment
+        description: Environment tag.
+        data_tests: [not_null]
+      - name: cost_center
+        description: Cost center tag.
+        data_tests: [not_null]
+      - name: application
+        description: Application tag.
+        data_tests: [not_null]
+      - name: usage_amount
+        description: Sum of usage in usage_unit. Credit-only lines contribute zero.
+        data_tests: [not_null, not_negative]
+      - name: gross_cost
+        description: Sum of usage charges before credits.
+        data_tests: [not_null, not_negative]
+      - name: credit_amount
+        description: Sum of credits as a positive magnitude.
+        data_tests: [not_null, not_negative]
+      - name: net_cost
+        description: gross_cost minus credit_amount.
+        data_tests: [not_null, not_negative]
+      - name: line_count
+        description: Number of source lines rolled into the row.
+        data_tests: [not_null]
+      - name: is_synthetic
+        description: True when every contributing line is synthetic.
+        data_tests: [not_null]
+      - name: dataset_label
+        description: Synthetic dataset label.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["synthetic-finops-portfolio"]
+
+  - name: fct_cost_by_team
+    description: >
+      Monthly net cost by team, environment, cost center, and cloud.
+      share_of_month is that row's share of total net cost in the month,
+      across both clouds. The shares for a month sum to 1.
+    columns:
+      - name: billing_month
+        description: First day of the month.
+        data_tests: [not_null]
+      - name: team
+        description: Team.
+        data_tests: [not_null]
+      - name: environment
+        description: Environment.
+        data_tests: [not_null]
+      - name: cost_center
+        description: Cost center.
+        data_tests: [not_null]
+      - name: cloud_provider
+        description: aws or gcp.
+        data_tests: [not_null]
+      - name: gross_cost
+        description: Monthly gross cost.
+        data_tests: [not_null, not_negative]
+      - name: credit_amount
+        description: Monthly credit magnitude.
+        data_tests: [not_null, not_negative]
+      - name: net_cost
+        description: Monthly net cost.
+        data_tests: [not_null, not_negative]
+      - name: share_of_month
+        description: net_cost divided by the month's total net cost.
+        data_tests: [not_null]
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - billing_month
+              - team
+              - environment
+              - cost_center
+              - cloud_provider
+
+  - name: fct_cost_mom
+    description: >
+      Month-over-month net cost by cloud, account, and service.
+      The first month has a null previous cost and a null change.
+      mom_change_ratio is a fraction, not a percentage point value
+      (0.10 means ten percent).
+    columns:
+      - name: billing_month
+        description: First day of the month.
+        data_tests: [not_null]
+      - name: cloud_provider
+        description: aws or gcp.
+        data_tests: [not_null]
+      - name: account_id
+        description: Account or project id.
+        data_tests: [not_null]
+      - name: account_name
+        description: Friendly name.
+        data_tests: [not_null]
+      - name: service_name
+        description: Service display name.
+        data_tests: [not_null]
+      - name: net_cost
+        description: Net cost for the month.
+        data_tests: [not_null, not_negative]
+      - name: prev_month_net_cost
+        description: Net cost for the previous month. Null for the first month.
+      - name: mom_change_amount
+        description: net_cost minus prev_month_net_cost. Null for the first month.
+      - name: mom_change_ratio
+        description: Change divided by the previous month. Null when the previous month is null or zero.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - billing_month
+              - cloud_provider
+              - account_id
+              - service_name
+
+  - name: fct_unit_cost
+    description: >
+      Daily unit cost by account, service, usage type, unit, and region.
+      gross_unit_cost and net_unit_cost divide cost by usage_amount.
+      In this dataset a spike multiplies usage and cost together, so the
+      unit cost stays near the anchor rate while total cost jumps.
+      Storage usage is the fraction of a GB-month accrued that day, so the
+      unit cost stays near the monthly GB rate. Do not compare unit costs
+      across different usage_unit values.
+    columns:
+      - name: usage_date
+        description: Usage date.
+        data_tests: [not_null]
+      - name: billing_month
+        description: First day of the month.
+        data_tests: [not_null]
+      - name: cloud_provider
+        description: aws or gcp.
+        data_tests: [not_null]
+      - name: account_id
+        description: Account or project id.
+        data_tests: [not_null]
+      - name: service_name
+        description: Service display name.
+        data_tests: [not_null]
+      - name: usage_type
+        description: Usage type.
+        data_tests: [not_null]
+      - name: usage_unit
+        description: Pricing unit.
+        data_tests: [not_null]
+      - name: region
+        description: Region.
+        data_tests: [not_null]
+      - name: usage_amount
+        description: Usage summed across teams and applications.
+        data_tests: [not_null, not_negative]
+      - name: gross_cost
+        description: Gross cost summed across teams and applications.
+        data_tests: [not_null, not_negative]
+      - name: credit_amount
+        description: Credit magnitude summed across teams and applications.
+        data_tests: [not_null, not_negative]
+      - name: net_cost
+        description: Net cost summed across teams and applications.
+        data_tests: [not_null, not_negative]
+      - name: gross_unit_cost
+        description: gross_cost / usage_amount. Null when usage is zero.
+      - name: net_unit_cost
+        description: net_cost / usage_amount. Null when usage is zero.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - usage_date
+              - cloud_provider
+              - account_id
+              - service_name
+              - usage_type
+              - usage_unit
+              - region
+
+  - name: mart_service_anomalies
+    description: >
+      Rolling z-score of daily net cost for each account and service.
+      The window is the previous 28 days, excluding the current day, so a
+      spike does not dilute its own score. history_days is how many of those
+      prior days exist. z_score is null until 14 prior days exist or when the
+      prior window has no variance. is_cost_spike is true when z_score is
+      at least 3 and net cost is at least 25% above the trailing mean.
+      This is a transparent screen for the portfolio, not a
+      production detector. labelled_spike_id is the generator's injected
+      incident id when one of the underlying lines was multiplied.
+    columns:
+      - name: usage_date
+        description: Usage date.
+        data_tests: [not_null]
+      - name: billing_month
+        description: First day of the month.
+        data_tests: [not_null]
+      - name: cloud_provider
+        description: aws or gcp.
+        data_tests: [not_null]
+      - name: account_id
+        description: Account or project id.
+        data_tests: [not_null]
+      - name: account_name
+        description: Friendly name.
+        data_tests: [not_null]
+      - name: service_name
+        description: Service display name.
+        data_tests: [not_null]
+      - name: net_cost
+        description: Daily net cost for the account and service.
+        data_tests: [not_null, not_negative]
+      - name: history_days
+        description: Number of prior days in the 28-day window.
+        data_tests: [not_null]
+      - name: rolling_mean_cost
+        description: Mean net cost over the prior window. Null on the first day.
+      - name: rolling_stddev_cost
+        description: Sample standard deviation over the prior window.
+      - name: z_score
+        description: (net_cost - rolling_mean_cost) / rolling_stddev_cost. Null without enough history or variance.
+      - name: is_cost_spike
+        description: >
+          True when history is long enough, z_score is at least 3, and net
+          cost is at least 25% above the trailing mean. The lift guard keeps
+          smooth storage series from flagging on month-length accrual.
+        data_tests: [not_null]
+      - name: labelled_spike_id
+        description: Injected spike id when the generator marked this account-service-day, otherwise null.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - usage_date
+              - cloud_provider
+              - account_id
+              - service_name

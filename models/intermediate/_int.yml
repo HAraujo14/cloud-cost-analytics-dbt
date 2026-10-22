@@ -1,0 +1,125 @@
+version: 2
+
+models:
+  - name: int_cost_lines
+    description: >
+      Unified multi-cloud line model. One row per AWS CUR line or GCP billing
+      row, with a shared column contract. AWS credits, which arrive as
+      negative CUR lines, become a positive credit_amount. GCP credits, which
+      arrive as a negative credits column on the usage row, use the same
+      positive magnitude. net_cost = gross_cost - credit_amount. Tax is not
+      modelled.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - source_line_id
+              - cloud_provider
+    columns:
+      - name: source_line_id
+        description: Line id from the cloud extract.
+        data_tests: [not_null]
+      - name: cloud_provider
+        description: aws or gcp.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["aws", "gcp"]
+      - name: usage_date
+        description: Date the usage occurred.
+        data_tests: [not_null]
+      - name: billing_month
+        description: First day of the usage month.
+        data_tests: [not_null]
+      - name: billing_account_id
+        description: Payer account or GCP billing account.
+        data_tests: [not_null]
+      - name: account_id
+        description: AWS usage account id or GCP project id.
+        data_tests: [not_null]
+      - name: account_name
+        description: Friendly account or project name.
+        data_tests: [not_null]
+      - name: line_item_type
+        description: usage or credit. GCP credits stay on the usage row.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["usage", "credit"]
+      - name: service_code
+        description: AWS product code or placeholder GCP service id.
+        data_tests: [not_null]
+      - name: service_name
+        description: Service display name.
+        data_tests: [not_null]
+      - name: usage_type
+        description: Usage type or SKU description.
+        data_tests: [not_null]
+      - name: operation
+        description: CUR operation. Null for GCP, which has no matching field.
+      - name: region
+        description: Region code.
+        data_tests: [not_null]
+      - name: availability_zone
+        description: Zone, when the source has one.
+      - name: resource_id
+        description: Synthetic resource id for AWS usage lines.
+      - name: usage_amount
+        description: Usage in usage_unit. Zero on AWS credit lines.
+        data_tests: [not_null, not_negative]
+      - name: usage_unit
+        description: Pricing unit.
+        data_tests: [not_null]
+      - name: gross_cost
+        description: Usage charge before credits. Zero on AWS credit-only lines.
+        data_tests: [not_null, not_negative]
+      - name: credit_amount
+        description: Credit as a positive magnitude. Zero when no credit applies.
+        data_tests: [not_null, not_negative]
+      - name: net_cost
+        description: >
+          gross_cost minus credit_amount. On an AWS credit line this is
+          negative because the credit is its own row and gross_cost is zero.
+          Aggregated net cost on fct_daily_cost stays non-negative.
+        data_tests: [not_null]
+      - name: currency
+        description: ISO currency code.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["USD"]
+      - name: team
+        description: Team tag or label.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["data-platform", "product-backend", "ml-platform", "shared-services", "finops"]
+      - name: environment
+        description: Environment tag or label.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["prod", "staging", "sandbox"]
+      - name: cost_center
+        description: Cost center tag or label.
+        data_tests: [not_null]
+      - name: application
+        description: Application tag or label.
+        data_tests: [not_null]
+      - name: is_synthetic
+        description: True on every row.
+        data_tests: [not_null]
+      - name: dataset_label
+        description: Constant synthetic dataset label.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["synthetic-finops-portfolio"]
+      - name: spike_id
+        description: Injected incident id, or null on ordinary days.
